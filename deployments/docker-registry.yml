@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: docker-registry
+  name: docker-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: docker-registry
+  template:
+    metadata:
+      labels:
+        name: docker-registry
+    spec:
+      volumes:
+        - name: registry
+          persistentVolumeClaim:
+            claimName: docker-registry
+      containers:
+        - image: registry:2
+          name: docker-registry
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - name: registry
+              mountPath: /var/lib/registry
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: docker-registry-ui
+  name: docker-registry-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: docker-registry-ui
+  template:
+    metadata:
+      labels:
+        name: docker-registry-ui
+    spec:
+      containers:
+        - image: joxit/docker-registry-ui:static
+          name: docker-registry-ui
+          env:
+            - name: REGISTRY_URL
+              value: https://images.hidden.computer
+            - name: REGISTRY_TITLE
+              value: images.hidden.computer
+          ports:
+            - containerPort: 80
+
